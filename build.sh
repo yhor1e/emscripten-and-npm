@@ -8,6 +8,21 @@ export CFLAGS="${OPTIMIZE}"
 export CPPFLAGS="${OPTIMIZE}"
 
 echo "============================================="
+echo "Compiling libvpx"
+echo "============================================="
+(
+  rm -rf build-vpx || true
+  mkdir build-vpx
+  cd build-vpx
+  emconfigure ../node_modules/libvpx/configure \
+    --target=generic-gnu
+  emmake make
+)
+echo "============================================="
+echo "Compiling libvpx done"
+echo "============================================="
+
+echo "============================================="
 echo "Compiling wasm bindings"
 echo "============================================="
 (
@@ -17,11 +32,14 @@ echo "============================================="
     --bind \
     -s STRICT=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
+    -s ASSERTIONS=0 \
     -s MALLOC=emmalloc \
     -s MODULARIZE=1 \
     -s EXPORT_ES6=1 \
     -o ./my-module.js \
-    src/my-module.cpp
+    -I ./node_modules/libvpx \
+    src/my-module.cpp \
+    build-vpx/libvpx.a
 
   # Create output folder
   mkdir -p dist
